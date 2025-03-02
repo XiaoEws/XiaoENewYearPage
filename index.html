@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小饿工作室 - 跨年特别庆祝</title>
-    <meta name="description" content="小饿工作室跨年特别庆祝页面，精确到秒倒计时，并配有烟花效果和背景音乐，迎接新年的到来！">
-    <!-- 内嵌CSS样式 -->
+    <title>🌟2026跨年盛典 - 小饿工作室</title>
     <style>
-        /* 基本样式重置 */
+        :root {
+            --primary: #ff3366;
+            --secondary: #33ccff;
+            --accent: #ffcc33;
+            --glow: radial-gradient(circle at center, 
+                rgba(255,51,102,0.4),
+                rgba(51,204,255,0.2),
+                transparent 60%);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -16,508 +22,568 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
+            font-family: 'Poppins', system-ui, sans-serif;
+            background: #000;
             color: #fff;
-            background-color: #000000;
-            /* 修改为纯黑色背景 */
-            margin: 0;
             overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
             height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            position: relative;
+            perspective: 1000px;
         }
 
-        /* 遮罩层 */
         .overlay {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: var(--glow),
+                       linear-gradient(45deg, 
+                           rgba(0,0,128,0.1), 
+                           rgba(128,0,128,0.1));
             z-index: 1;
+            animation: glow-pulse 8s infinite;
         }
 
-        /* 头部 */
         header {
             text-align: center;
             z-index: 2;
-            margin-bottom: 50px;
-            position: relative;
+            margin-bottom: 3rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px var(--primary);
+            background: linear-gradient(45deg, 
+                var(--primary), 
+                var(--secondary), 
+                var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(255,51,102,0.5));
+        }
+
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
             z-index: 2;
         }
 
-        header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
+        .time-unit {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 0 40px rgba(255,51,102,0.3),
+                       inset 0 0 20px rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
         }
 
-        /* 音乐控制按钮 */
-        .music-control {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+        .time-unit:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 50px rgba(255,51,102,0.5);
+        }
+
+        .number {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .label {
+            font-size: 1.2em;
+            opacity: 0.9;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .controls {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
             z-index: 3;
         }
 
-        .music-control button {
-            background: none;
+        .music-btn {
+            width: 60px;
+            height: 60px;
             border: none;
-            color: #fff;
-            font-size: 2em;
+            border-radius: 50%;
+            background: linear-gradient(45deg, 
+                var(--primary), 
+                var(--secondary));
+            color: white;
+            font-size: 1.8em;
             cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.3s;
+            transition: all 0.4s cubic-bezier(0.68,-0.55,0.27,1.55);
+            box-shadow: 0 8px 25px rgba(255,51,102,0.4);
         }
 
-        .music-control button:hover {
-            opacity: 1;
+        .music-btn:hover {
+            transform: rotate(360deg) scale(1.2);
+            box-shadow: 0 12px 35px rgba(255,51,102,0.6);
         }
 
-        /* 倒计时 */
-        .countdown {
-            text-align: center;
-            z-index: 2;
-            position: relative;
-            z-index: 2;
-        }
-
-        .countdown div {
-            display: inline-block;
-            margin: 0 15px;
-            text-align: center;
-        }
-
-        .countdown div span {
-            display: block;
-            font-size: 5em;
-            font-weight: bold;
-        }
-
-        .countdown div p {
-            font-size: 1.5em;
-            margin-top: 10px;
-        }
-
-        /* 庆祝动画 */
-        .celebration {
-            position: absolute;
+        canvas {
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('images/fireworks.gif') no-repeat center center;
-            background-size: cover;
-            display: none;
-            z-index: 3;
         }
 
-        /* 页脚 */
-        footer {
-            text-align: center;
-            position: absolute;
-            bottom: 20px;
-            z-index: 2;
-            width: 100%;
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
         }
 
-        footer p {
-            font-size: 1.2em;
+        @keyframes glow-pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.8; }
         }
 
-        /* 响应式设计 */
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 2em;
+            .countdown {
+                gap: 1rem;
+                padding: 0 1rem;
             }
-
-            .countdown div span {
-                font-size: 3em;
+            .time-unit {
+                padding: 1rem;
             }
-
-            .countdown div p {
-                font-size: 1.2em;
-            }
-
-            footer p {
-                font-size: 1em;
-            }
-
-            .music-control {
-                top: 10px;
-                right: 10px;
-            }
-
-            .music-control button {
+            .music-btn {
+                width: 50px;
+                height: 50px;
                 font-size: 1.5em;
             }
         }
-
-        /* 庆祝动画 */
-        @keyframes celebrate {
-            0% {
-                opacity: 0;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0;
-            }
-        }
-
-        .celebration {
-            animation: celebrate 5s infinite;
-        }
-
-        /* 烟花画布 */
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
     </style>
 </head>
-
 <body>
+    <div class="container">
+        <div class="overlay"></div>
+        <canvas id="fireworks"></canvas>
+        <canvas id="visualizer"></canvas>
+        
+        <header>
+            <h1>2026 璀璨新年夜</h1>
+            <p>倒计时启动！</p>
+        </header>
 
-    <!-- 遮罩层 -->
-    <div class="overlay"></div>
-    <h5>@xiaoews.github.io</h5>
-
-    <!-- 头部 -->
-    <header>
-        <h1>跨年倒计时</h1>
-        <p>喜迎2026年ヾ(*´∀ ˋ*)ﾉ</p>
-    </header>
-
-    <!-- 音乐控制按钮 -->
-    <div class="music-control">
-        <button id="music-play" aria-label="播放音乐">&#9654;</button>
-        <button id="music-pause" aria-label="暂停音乐">&#10074;&#10074;</button>
-    </div>
-
-    <!-- 倒计时 -->
-    <div class="countdown">
-        <div>
-            <span id="days">0</span>
-            <p>天</p>
+        <div class="countdown">
+            <div class="time-unit" style="color: var(--primary)">
+                <div class="number" id="days">00</div>
+                <div class="label">Days</div>
+            </div>
+            <div class="time-unit" style="color: var(--secondary)">
+                <div class="number" id="hours">00</div>
+                <div class="label">Hours</div>
+            </div>
+            <div class="time-unit" style="color: var(--accent)">
+                <div class="number" id="minutes">00</div>
+                <div class="label">Minutes</div>
+            </div>
+            <div class="time-unit" style="color: #ff66cc">
+                <div class="number" id="seconds">00</div>
+                <div class="label">Seconds</div>
+            </div>
         </div>
-        <div>
-            <span id="hours">0</span>
-            <p>小时</p>
-        </div>
-        <div>
-            <span id="minutes">0</span>
-            <p>分钟</p>
-        </div>
-        <div>
-            <span id="seconds">0</span>
-            <p>秒</p>
+
+        <div class="controls">
+            <button class="music-btn" id="play">▶</button>
+            <button class="music-btn" id="pause">⏸</button>
         </div>
     </div>
 
-    <!-- 庆祝动画 -->
-    <div class="celebration" id="celebration"></div>
-
-    <!-- 页脚 -->
-    <footer>
-        <p>© 2024 小饿工作室. 版权所有.<br>页面由@天天饿喵Tiantiane 制作构建<br><a href="/index.html">返回页面</a><br><a href="https://github.com/XiaoEws/XiaoENewYearPage">源代码仓库地址</a></p>
-    </footer>
-
-    <!-- 背景音乐 -->
-    <audio id="background-music" src="background.mp3" loop></audio>
-
-    <!-- 烟花效果 -->
-    <canvas id="fireworks-canvas"></canvas>
-
-    <!-- JavaScript代码 -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // 烟花效果代码
-        var SCREEN_WIDTH = window.innerWidth,
-            SCREEN_HEIGHT = window.innerHeight,
-            mousePos = {
-                x: 400,
-                y: 300
-            },
-            canvas = document.getElementById('fireworks-canvas'),
-            context = canvas.getContext('2d'),
-            particles = [],
-            rockets = [],
-            MAX_PARTICLES = 600, // 设置最大粒子数
-            colorCode = 0;
-
-        // 初始化
-        $(document).ready(function () {
-            document.body.appendChild(canvas);
-            canvas.width = SCREEN_WIDTH;
-            canvas.height = SCREEN_HEIGHT;
-            setInterval(launch, 800); // 设置发射频率
-            setInterval(loopfun, 1000 / 50);
-        });
-
-        // 更新鼠标位置
-        $(document).mousemove(function (e) {
-            e.preventDefault();
-            mousePos = {
-                x: e.clientX,
-                y: e.clientY
-            };
-        });
-
-        // 增加发射的火箭数
-        $(document).mousedown(function (e) {
-            for (var i = 0; i < 8; i++) {
-                launchFrom(Math.random() * SCREEN_WIDTH * 2 / 3 + SCREEN_WIDTH / 6);
-            }
-        });
-
-        // 发射火箭
-        function launch() {
-            launchFrom(mousePos.x);
-        }
-
-        // 从指定位置发射火箭
-        function launchFrom(x) {
-            if (rockets.length < 12) { // 设置最大火箭数
-                var rocket = new Rocket(x);
-                rocket.explosionColor = Math.floor(Math.random() * 360 / 10) * 10;
-                rocket.vel.y = Math.random() * -3 - 4; // 设置火箭速度
-                rocket.vel.x = Math.random() * 6 - 3; // 设置火箭速度
-                rocket.size = 8;
-                rocket.shrink = 0.999;
-                rocket.gravity = 0.01;
-                rockets.push(rocket);
-            }
-        }
-
-        // 循环函数
-        function loopfun() {
-            // 更新屏幕尺寸
-            if (SCREEN_WIDTH != window.innerWidth) {
-                canvas.width = SCREEN_WIDTH = window.innerWidth;
-            }
-            if (SCREEN_HEIGHT != window.innerHeight) {
-                canvas.height = SCREEN_HEIGHT = window.innerHeight;
+        // 烟花系统
+        class FireworksSystem {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.rockets = [];
+                this.trails = [];
+                this.init();
             }
 
-            // 清除画布
-            context.fillStyle = "rgba(0, 0, 0, 0.05)";
-            context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            init() {
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.bindEvents();
+                this.createStars();
+                this.loop();
+            }
 
-            var existingRockets = [];
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
 
-            for (var i = 0; i < rockets.length; i++) {
-                // 更新和渲染火箭
-                rockets[i].update();
-                rockets[i].render(context);
+            bindEvents() {
+                const handleInteraction = (x, y) => {
+                    this.launchRocket(x, y);
+                    this.createRipple(x, y);
+                };
 
-                // 计算与鼠标的距离
-                var distance = Math.sqrt(Math.pow(mousePos.x - rockets[i].pos.x, 2) + Math.pow(mousePos.y - rockets[i].pos.y, 2));
+                window.addEventListener('click', e => handleInteraction(e.clientX, e.clientY));
+                window.addEventListener('touchstart', e => {
+                    e.preventDefault();
+                    handleInteraction(e.touches.clientX, e.touches.clientY);
+                }, { passive: false });
+            }
 
-                // 随机爆炸概率
-                var randomChance = rockets[i].pos.y < (SCREEN_HEIGHT * 2 / 3) ? (Math.random() * 100 <= 1) : false;
-
-                /* 爆炸规则
-                - 屏幕上方80%
-                - 向下移动
-                - 接近鼠标
-                - 1%随机爆炸
-                */
-                if (rockets[i].pos.y < SCREEN_HEIGHT / 5 || rockets[i].vel.y >= 0 || distance < 50 || randomChance) {
-                    rockets[i].explode();
-                } else {
-                    existingRockets.push(rockets[i]);
+            createStars() {
+                for (let i = 0; i < 300; i++) {
+                    this.particles.push(new Star());
                 }
             }
 
-            rockets = existingRockets;
-
-            var existingParticles = [];
-
-            for (var i = 0; i < particles.length; i++) {
-                particles[i].update();
-
-                // 渲染和保存粒子
-                if (particles[i].exists()) {
-                    particles[i].render(context);
-                    existingParticles.push(particles[i]);
+            launchRocket(x, y) {
+                if (this.rockets.length < 15) {
+                    const rocket = new Rocket(x, y);
+                    this.rockets.push(rocket);
+                    this.trails.push({
+                        positions: [],
+                        color: rocket.color
+                    });
+                    this.playSound();
                 }
             }
 
-            // 更新粒子数组
-            particles = existingParticles;
+            playSound() {
+                const ctx = new AudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 440 + Math.random() * 880;
+                gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + 0.5);
+            }
 
-            while (particles.length > MAX_PARTICLES) {
-                particles.shift();
+            createRipple(x, y) {
+                for (let i = 0; i < 30; i++) {
+                    this.particles.push(new Ripple(x, y));
+                }
+            }
+
+            loop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.loop());
+            }
+
+            update() {
+                // 更新火箭
+                this.rockets = this.rockets.filter((rocket, index) => {
+                    rocket.update();
+                    this.trails[index].positions.push({...rocket.position});
+                    if (this.trails[index].positions.length > 25) {
+                        this.trails[index].positions.shift();
+                    }
+                    
+                    if (rocket.shouldExplode()) {
+                        this.createExplosion(rocket);
+                        this.trails.splice(index, 1);
+                        return false;
+                    }
+                    return true;
+                });
+
+                // 更新粒子
+                this.particles = this.particles.filter(particle => {
+                    particle.update();
+                    return particle.isAlive;
+                });
+            }
+
+            createExplosion(rocket) {
+                const count = Math.random() * 150 + 100;
+                for (let i = 0; i < count; i++) {
+                    this.particles.push(new ExplosionParticle(rocket.position, rocket.color));
+                }
+                this.createShockwave(rocket.position);
+                this.createSparkles(rocket.position);
+            }
+
+            createShockwave(pos) {
+                for (let i = 0; i < 50; i++) {
+                    this.particles.push(new Shockwave(pos));
+                }
+            }
+
+            createSparkles(pos) {
+                for (let i = 0; i < 30; i++) {
+                    this.particles.push(new Sparkle(pos));
+                }
+            }
+
+            draw() {
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // 绘制拖尾
+                this.trails.forEach(trail => {
+                    trail.positions.forEach((pos, i) => {
+                        const alpha = 0.2 + i * 0.03;
+                        this.ctx.beginPath();
+                        this.ctx.arc(pos.x, pos.y, i * 0.5, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(${trail.color}, ${alpha})`;
+                        this.ctx.fill();
+                    });
+                });
+
+                // 绘制粒子
+                this.particles.forEach(particle => particle.draw(this.ctx));
+                
+                // 绘制火箭
+                this.rockets.forEach(rocket => rocket.draw(this.ctx));
             }
         }
-
-        // 粒子类
-        function Particle(pos) {
-            this.pos = pos || { x: 0, y: 0 };
-            this.vel = { x: 0, y: 0 };
-            this.shrink = 0.97;
-            this.size = 2;
-            this.resistance = 1;
-            this.gravity = 0;
-            this.flick = false;
-            this.alpha = 1;
-            this.fade = 0;
-            this.color = Math.random() * 360; // 随机颜色
-        }
-
-        Particle.prototype.update = function () {
-            this.vel.x *= this.resistance;
-            this.vel.y *= this.resistance;
-            this.vel.y += this.gravity;
-            this.pos.x += this.vel.x;
-            this.pos.y += this.vel.y;
-            this.size *= this.shrink;
-            this.alpha -= this.fade;
-
-            // 分裂粒子
-            if (Math.random() < 0.05 && this.size > 1) {
-                var newParticle = new Particle(this.pos);
-                newParticle.vel.x = this.vel.x + (Math.random() - 0.5) * 2;
-                newParticle.vel.y = this.vel.y + (Math.random() - 0.5) * 2;
-                newParticle.size = this.size / 2;
-                newParticle.color = this.color;
-                particles.push(newParticle);
-            }
-        };
-
-        Particle.prototype.render = function (c) {
-            if (!this.exists()) return;
-            c.save();
-            c.globalCompositeOperation = 'lighter';
-            var x = this.pos.x, y = this.pos.y, r = this.size / 2;
-            var gradient = c.createRadialGradient(x, y, 0.1, x, y, r);
-            gradient.addColorStop(0.1, "rgba(255,255,255," + this.alpha + ")");
-            gradient.addColorStop(0.8, "hsla(" + this.color + ", 100%, 50%, " + this.alpha + ")");
-            gradient.addColorStop(1, "hsla(" + this.color + ", 100%, 50%, 0.1)");
-            c.fillStyle = gradient;
-            c.beginPath();
-            c.arc(this.pos.x, this.pos.y, this.flick ? Math.random() * this.size : this.size, 0, Math.PI * 2, true);
-            c.closePath();
-            c.fill();
-            c.restore();
-        };
-
-        Particle.prototype.exists = function () {
-            return this.alpha >= 0.1 && this.size >= 1;
-        };
 
         // 火箭类
-        function Rocket(x) {
-            Particle.apply(this, [{
-                x: x,
-                y: SCREEN_HEIGHT
-            }]);
-            this.explosionColor = 0;
+        class Rocket {
+            constructor(x, y) {
+                this.position = { x, y: y || window.innerHeight + 100 };
+                this.velocity = { 
+                    x: (Math.random() - 0.5) * 10, 
+                    y: Math.random() * -18 - 10 
+                };
+                this.color = `hsla(${Math.random() * 360}, 100%, 50%, 1)`;
+                this.size = 15;
+                this.life = 1;
+            }
+
+            update() {
+                this.velocity.y += 0.02;
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                this.size *= 0.97;
+                this.life -= 0.003;
+            }
+
+            shouldExplode() {
+                return this.position.y < window.innerHeight * 0.15 || this.life <= 0;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 30;
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
         }
 
-        Rocket.prototype = new Particle();
-        Rocket.prototype.constructor = Rocket;
-
-        Rocket.prototype.explode = function () {
-            var count = Math.random() * 10 + 80; // 设置每个烟花的粒子数
-            for (var i = 0; i < count; i++) {
-                var particle = new Particle(this.pos);
-                var angle = Math.random() * Math.PI * 2;
-                var speed = Math.cos(Math.random() * Math.PI / 2) * 15; // 设置粒子速度
-                particle.vel.x = Math.cos(angle) * speed;
-                particle.vel.y = Math.sin(angle) * speed;
-                particle.size = 10; // 设置粒子大小
-                particle.gravity = 0.1; // 设置粒子重力
-                particle.resistance = 0.92;
-                particle.shrink = Math.random() * 0.05 + 0.93;
-                particle.flick = true;
-                particle.color = this.explosionColor;
-                particles.push(particle);
+        // 爆炸粒子
+        class ExplosionParticle {
+            constructor(pos, color) {
+                this.position = { ...pos };
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 20,
+                    y: (Math.random() - 0.5) * 20
+                };
+                this.color = color;
+                this.size = Math.random() * 10 + 5;
+                this.alpha = 1;
+                this.isAlive = true;
             }
-        };
 
-        Rocket.prototype.render = function (c) {
-            if (!this.exists()) return;
-            c.save();
-            c.globalCompositeOperation = 'lighter';
-            var x = this.pos.x, y = this.pos.y, r = this.size / 2;
-            var gradient = c.createRadialGradient(x, y, 0.1, x, y, r);
-            gradient.addColorStop(0.1, "rgba(255, 255, 255 ," + this.alpha + ")");
-            gradient.addColorStop(1, "rgba(0, 0, 0, " + this.alpha + ")");
-            c.fillStyle = gradient;
-            c.beginPath();
-            c.arc(this.pos.x, this.pos.y, this.flick ? Math.random() * this.size / 2 + this.size / 2 : this.size, 0, Math.PI * 2, true);
-            c.closePath();
-            c.fill();
-            c.restore();
-        };
+            update() {
+                this.velocity.y += 0.1;
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                this.velocity.x *= 0.92;
+                this.velocity.y *= 0.92;
+                this.alpha -= 0.012;
+                this.size *= 0.95;
+                this.isAlive = this.alpha > 0 && this.size > 1;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.color.split(',')}, ${this.alpha})`;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // 星空粒子
+        class Star {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.position = {
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight
+                };
+                this.size = Math.random() * 3;
+                this.alpha = Math.random() * 0.7 + 0.3;
+                this.speed = Math.random() * 0.1;
+            }
+
+            update() {
+                this.position.y += this.speed;
+                if (this.position.y > window.innerHeight) this.reset();
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.fill();
+            }
+        }
+
+        // 冲击波特效
+        class Shockwave {
+            constructor(pos) {
+                this.position = { ...pos };
+                this.size = 1;
+                this.maxSize = Math.random() * 150 + 50;
+                this.color = `hsla(${Math.random() * 360}, 100%, 50%, 1)`;
+                this.life = 1;
+            }
+
+            update() {
+                this.size += 15;
+                this.life -= 0.02;
+                this.isAlive = this.life > 0 && this.size < this.maxSize;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.size, 0, Math.PI * 2);
+                ctx.strokeStyle = `hsla(${this.color}, ${this.life})`;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // 闪烁星尘
+        class Sparkle {
+            constructor(pos) {
+                this.position = { ...pos };
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 10,
+                    y: (Math.random() - 0.5) * 10
+                };
+                this.size = Math.random() * 4 + 2;
+                this.alpha = 1;
+            }
+
+            update() {
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                this.alpha -= 0.02;
+                this.isAlive = this.alpha > 0;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // 音乐播放器
+        class MusicPlayer {
+            constructor() {
+                this.audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2991/2991-preview.mp3');
+                this.audio.loop = true;
+                this.initControls();
+            }
+
+            initControls() {
+                const playBtn = document.getElementById('play');
+                const pauseBtn = document.getElementById('pause');
+                
+                playBtn.addEventListener('click', () => this.toggle());
+                pauseBtn.addEventListener('click', () => this.toggle());
+                
+                this.audio.addEventListener('play', () => {
+                    playBtn.style.display = 'none';
+                    pauseBtn.style.display = 'block';
+                });
+                
+                this.audio.addEventListener('pause', () => {
+                    playBtn.style.display = 'block';
+                    pauseBtn.style.display = 'none';
+                });
+            }
+
+            toggle() {
+                this.audio.paused ? this.audio.play() : this.audio.pause();
+            }
+        }
+
+        // 初始化系统
+        const fireworksCanvas = document.getElementById('fireworks');
+        const fireworks = new FireworksSystem(fireworksCanvas);
+        const musicPlayer = new MusicPlayer();
 
         // 倒计时逻辑
-        // 设置目标日期和时间
-        const targetDate = new Date("January 1, 2026 00:00:00").getTime();
-        // 更新倒计时的函数
-        const countdownFunction = setInterval(function () {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
+        function updateCountdown() {
+            const target = new Date('2026-01-01T00:00:00').getTime();
+            const now = Date.now();
+            const diff = target - now;
 
-            // 计算时间差
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            // 显示倒计时
-            document.getElementById("days").innerHTML = days;
-            document.getElementById("hours").innerHTML = hours;
-            document.getElementById("minutes").innerHTML = minutes;
-            document.getElementById("seconds").innerHTML = seconds;
-
-            // 检查是否到达目标日期
-            if (distance < 0) {
-                clearInterval(countdownFunction);
-                document.getElementById("celebration").style.display = "block";
-                document.getElementById("celebration").style.animation = "celebrate 5s infinite";
-                document.querySelector(".countdown").style.display = "none";
-                document.querySelector("header h1").innerHTML = "新年快乐！";
-                document.querySelector("header p").innerHTML = "2025年元旦快乐！(*^▽^*)";
-                music.play();
-                playButton.style.display = "none";
-                pauseButton.style.display = "inline";
+            if (diff <= 0) {
+                document.querySelector('h1').textContent = '新年快乐！';
+                document.querySelector('.countdown').style.display = 'none';
+                return;
             }
-        }, 1000);
 
-        // 控制音乐播放
-        const music = document.getElementById("background-music");
-        const playButton = document.getElementById("music-play");
-        const pauseButton = document.getElementById("music-pause");
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-        playButton.addEventListener("click", function () {
-            music.play();
-            playButton.style.display = "none";
-            pauseButton.style.display = "inline";
-        });
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
 
-        pauseButton.addEventListener("click", function () {
-            music.pause();
-            pauseButton.style.display = "none";
-            playButton.style.display = "inline";
-        });
+            requestAnimationFrame(updateCountdown);
+        }
 
-        // 初始化音乐控制按钮状态
-        pauseButton.style.display = "inline";
+        updateCountdown();
     </script>
 </body>
-
 </html>
