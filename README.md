@@ -1,9 +1,8 @@
-```markdown
 # 2026跨年盛典倒计时系统
 
 ✨ 一个融合动态烟花、音频可视化与沉浸式交互的跨年倒计时项目
 
-![演示截图](https://via.placeholder.com/800x500.png?text=2026+NYE+Demo)
+![演示截图](https://懒得写.abc)
 
 ## 🌟 功能特点
 
